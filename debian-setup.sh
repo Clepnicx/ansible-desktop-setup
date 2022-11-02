@@ -11,7 +11,7 @@ sudo apt update && sudo apt upgrade -y
 
 ## install packages
 # packages from debian repos
-sudo apt install bpytop cmatrix ghc gparted kitty lolcat neofetch nextcloud-desktop openconnect openscad qbittorrent texlive thunderbird vlc zsh -y
+sudo apt install bpytop cmatrix ghc gparted kitty lolcat neofetch nextcloud-desktop openconnect openscad qbittorrent texlive thunderbird vim vlc zsh -y
 
 # instal vscode
 curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
