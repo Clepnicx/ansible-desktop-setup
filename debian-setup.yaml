@@ -1,0 +1,172 @@
+- hosts: localhost
+  connection: local
+  become: yes
+  
+  vars:
+    username: clep    # change username to current name
+  
+  collections:
+    - community.general
+  
+  tasks:
+    - name: Remove unwanted packages
+      ansible.builtin.apt:
+        pkg:
+        - kmail
+        - korganizer
+        - konqueror
+        state: absent
+        
+    - name: Install requierments for VSCode
+      ansible.builtin.apt:
+        pkg: 
+        - apt-transport-https
+        - curl
+        state: latest
+        
+    - name: Add the Microsoft.gpg Keys for VSCode
+      ansible.builtin.raw: curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+        
+    - name: Install the Keys
+      ansible.builtin.raw: sudo install -o root -g root -m 644 microsoft.gpg /usr/share/keyrings/microsoft-archive-keyring.gpg
+    
+    - name: Add the Microsoft repository for VSCode
+      ansible.builtin.raw: sudo sh -c 'echo "deb [arch=amd64,arm64,armhf signed-by=/usr/share/keyrings/microsoft-archive-keyring.gpg] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list'
+      
+    - name: Update the repository cache and update all packages
+      ansible.builtin.apt:
+        name: "*"
+        state: latest
+        update_cache: yes
+        
+    - name: Remove dependencies that are no longer required
+      ansible.builtin.apt:
+        autoremove: yes
+
+    - name: Install apt packages
+      ansible.builtin.apt:
+        pkg:
+        - bpytop
+        - cmatrix
+        - code
+        - default-jdk
+        - flatpak
+        - fonts-firacode
+        - fonts-font-awesome
+        - fonts-powerline
+        - ghc
+        - handbrake
+        - kitty
+        - neofetch
+        - neovim
+        - nextcloud-desktop
+        - openconnect
+        - openscad
+        - syncthing-gtk
+        - texlive-full
+        - thunderbird
+        - vlc
+        - wget
+        - zsh
+        state: latest
+    
+    - name: Add flathub flatpak repository remote to the user installation
+      community.general.flatpak_remote:
+        name: flathub
+        state: present
+        flatpakrepo_url: https://flathub.org/repo/flathub.flatpakrepo
+        method: user
+        
+    - name: Install Bitwarden
+      community.general.flatpak:
+        name: com.bitwarden.desktop
+        state: present
+        remote: flathub
+    
+    - name: Install Telegram Desktop
+      community.general.flatpak:
+        name: org.telegram.desktop
+        state: present
+        remote: flathub
+
+    - name: Install MarkText
+      community.general.flatpak:
+        name: com.github.marktext.marktext
+        state: present
+        remote: flathub
+        
+    - name: Install draw.io
+      community.general.flatpak:
+        name: com.jgraph.drawio.desktop
+        state: present
+        remote: flathub
+        
+    - name: Install Discord
+      community.general.flatpak:
+        name: com.discordapp.Discord
+        state: present
+        remote: flathub
+        
+    - name: Install Gnome Boxes
+      community.general.flatpak:
+        name: org.gnome.Boxes
+        state: present
+        remote: flathub
+        
+    - name: Install Cider
+      community.general.flatpak:
+        name: sh.cider.Cider
+        state: present
+        remote: flathub
+        
+    - name: Install MakeMKV
+      community.general.flatpak:
+        name: com.makemkv.MakeMKV
+        state: present
+        remote: flathub
+        
+    #- name: Download Jetbrains Toolbox
+    #  become_user: "{{ username }}"
+    #  ansible.builtin.unarchive:
+    #    src: https://download-cdn.jetbrains.com/toolbox/jetbrains-#toolbox-1.27.1.13673.tar.gz
+    #    dest: ~/Downloads
+    #    remote_src: yes
+    
+    - name: Change shell to zsh
+      user:
+        name: "{{ username }}"
+        shell: /usr/bin/zsh
+        
+    - name: Clone zsh-autosuggestions from github
+      ansible.builtin.git:
+        repo: https://github.com/zsh-users/zsh-autosuggestions
+        dest: /home/{{ username }}/.zsh/plugins/zsh-autosuggestions
+        
+    - name: Clone zsh-completions from github
+      ansible.builtin.git:
+        repo: https://github.com/zsh-users/zsh-completions
+        dest: /home/{{ username }}/.zsh/plugins/zsh-completions
+        
+    - name: Clone zsh-syntax-highlighting from github
+      ansible.builtin.git:
+        repo: https://github.com/zsh-users/zsh-syntax-highlighting
+        dest: /home/{{ username }}/.zsh/plugins/zsh-syntax-highlighting
+    
+    #- name: Install starship prompt
+    #  ansible.builtin.raw: curl -sS https://starship.rs/install.sh | sh
+    
+    - name: Clone .config files from github and move them to the right locations
+      block: 
+        - name: Clone .config files repo
+          ansible.builtin.git:
+            repo: https://github.com/Clepnicx/config-files
+            dest: /home/{{ username }}/config-files
+    
+    - name: Install papyrus-icons
+      ansible.builtin.raw: wget -qO- https://git.io/papirus-icon-theme-install | sh
+      
+    - name: Install papyrus-folders
+      ansible.builtin.raw: wget -qO- https://git.io/papirus-folders-install | sh
+      
+    - name: Set folder color
+      ansible.builtin.raw: papirus-folders -C indigo
