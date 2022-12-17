@@ -161,6 +161,31 @@
           ansible.builtin.git:
             repo: https://github.com/Clepnicx/config-files
             dest: /home/{{ username }}/config-files
+            
+        - name: Move starship.toml
+          ansible.builtin.copy:
+            src: /home/{{ username }}/config-files/starship.toml
+            dest: /home/{{ username }}/.config
+            
+        - name: Move kitty.conf
+          ansible.builtin.copy:
+            src: /home/{{ username }}/config-files/kitty.conf
+            dest: /home/{{ username }}/.config/kitty/
+            
+        - name: Move .zshrc
+          ansible.builtin.copy:
+            src: /home/{{ username }}/config-files/.zshrc
+            dest: /home/{{ username }}/
+        
+        - name: Move .bashrc
+          ansible.builtin.copy:
+            src: /home/{{ username }}/config-files/.bashrc
+            dest: /home/{{ username }}/
+            
+        - name: Move .vimrc
+          ansible.builtin.copy:
+            src: /home/{{ username }}/config-files/.vimrc
+            dest: /home/{{ username }}/
     
     - name: Install papyrus-icons
       ansible.builtin.raw: wget -qO- https://git.io/papirus-icon-theme-install | sh
