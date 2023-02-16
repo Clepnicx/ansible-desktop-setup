@@ -42,7 +42,6 @@
         state: latest
     
     - name: Add flathub flatpak repository remote to the user installation
-      become: yes
       community.general.flatpak_remote:
         name: flathub
         state: present
