@@ -90,6 +90,12 @@
         state: present
         remote: flathub
     
+    - name: Install OnlyOffice
+      community.general.flatpak:
+        name: org.onlyoffice.desktopeditors
+        state: present
+        remote: flathub
+    
     - name: Change shell to zsh
       user:
         name: "{{ username }}"
