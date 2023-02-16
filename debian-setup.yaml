@@ -85,6 +85,12 @@
         state: present
         remote: flathub
     
+    - name: Install Anki
+      community.general.flatpak:
+        name: net.ankiweb.Anki
+        state: present
+        remote: flathub
+    
     - name: Change shell to zsh
       user:
         name: "{{ username }}"
