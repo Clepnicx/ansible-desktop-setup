@@ -1,1 +1,1 @@
-# debian-setup
+# Desktop Setup
