@@ -95,6 +95,21 @@
         name: "{{ username }}"
         shell: /usr/bin/zsh
     
+    - name: Clone zsh-autosuggestions from github
+      ansible.builtin.git:
+        repo: https://github.com/zsh-users/zsh-autosuggestions
+        dest: /home/{{ username }}/.zsh/plugins/zsh-autosuggestions
+
+    - name: Clone zsh-completions from github
+      ansible.builtin.git:
+        repo: https://github.com/zsh-users/zsh-completions
+        dest: /home/{{ username }}/.zsh/plugins/zsh-completions
+
+    - name: Clone zsh-syntax-highlighting from github
+      ansible.builtin.git:
+        repo: https://github.com/zsh-users/zsh-syntax-highlighting
+        dest: /home/{{ username }}/.zsh/plugins/zsh-syntax-highlighting
+    
     - name: Clone .config files from github and move them to the right locations
       block: 
         - name: Clone .config files repo
