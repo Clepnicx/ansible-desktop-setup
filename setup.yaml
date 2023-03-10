@@ -28,6 +28,7 @@
         - fonts-powerline
         - ghc
         - kitty
+        - micro
         - neofetch
         - nextcloud-desktop
         - openconnect
@@ -36,7 +37,6 @@
         - texlive-full
         - thunderbird
         - vlc
-        - vim
         - wget
         - zsh
         state: latest
