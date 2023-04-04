@@ -5,12 +5,15 @@
 
   vars:
     username: clepnicx    # change username to current name
+    distro: opensuse    # change to distro, options: opensuse, debian, fedora, arch
+    desktop: kde    # change to de, options: kde, gnome
 
   collections:
     - community.general
 
   tasks:
     - name: Remove unwanted packages
+      when: desktop == "kde"
       ansible.builtin.package:
         pkg:
           - kmail
@@ -18,11 +21,43 @@
           - konqueror
         state: absent
 
-    - name: Install packages
-      ansible.builtin.package:
+    - name: Install debian packages
+      when: distro == "debian"
+      ansible.builtin.apt:
         pkg:
           - bpytop
-          - default-jdk
+          - curl
+          - firefox-esr
+          - flatpak
+          - fonts-firacode
+          - fonts-font-awesome
+          - fonts-powerline
+          - ghc
+          - git
+          - gparted
+          - kitty
+          - micro
+          - neofetch
+          - nextcloud-desktop
+          - openconnect
+          - openscad
+          - python3
+          - qbittorrent
+          - retroarch
+          - syncthing-gtk
+          - texlive-full
+          - thunderbird
+          - vlc
+          - wget
+          - zsh
+        state: present
+        update_cache: true
+
+    - name: Install debian packages
+      when: distro == "opensuse"
+      community.general.zypper:
+        pkg:
+          - bpytop
           - flatpak
           - fonts-firacode
           - fonts-font-awesome
@@ -34,6 +69,7 @@
           - nextcloud-desktop
           - openconnect
           - openscad
+          - python3
           - syncthing-gtk
           - texlive-full
           - thunderbird
@@ -41,6 +77,8 @@
           - wget
           - zsh
         state: present
+        disable_recommends: false
+        update_cache: true
 
     - name: Add flathub flatpak repository remote to the user installation
       community.general.flatpak_remote:
