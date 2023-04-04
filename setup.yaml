@@ -1,59 +1,60 @@
-- hosts: localhost
+---
+- hosts: localhost    # desktop setup
   connection: local
-  become: yes
-  
+  become: true
+
   vars:
     username: clepnicx    # change username to current name
-  
+
   collections:
     - community.general
-  
+
   tasks:
     - name: Remove unwanted packages
       ansible.builtin.apt:
         pkg:
-        - kmail
-        - korganizer
-        - konqueror
+          - kmail
+          - korganizer
+          - konqueror
         state: absent
-        
+
     - name: Install packages
       ansible.builtin.package:
         pkg:
-        - bpytop
-        - default-jdk
-        - flatpak
-        - fonts-firacode
-        - fonts-font-awesome
-        - fonts-powerline
-        - ghc
-        - kitty
-        - micro
-        - neofetch
-        - nextcloud-desktop
-        - openconnect
-        - openscad
-        - syncthing-gtk
-        - texlive-full
-        - thunderbird
-        - vlc
-        - wget
-        - zsh
-        state: latest
-    
+          - bpytop
+          - default-jdk
+          - flatpak
+          - fonts-firacode
+          - fonts-font-awesome
+          - fonts-powerline
+          - ghc
+          - kitty
+          - micro
+          - neofetch
+          - nextcloud-desktop
+          - openconnect
+          - openscad
+          - syncthing-gtk
+          - texlive-full
+          - thunderbird
+          - vlc
+          - wget
+          - zsh
+        state: present
+
     - name: Add flathub flatpak repository remote to the user installation
       community.general.flatpak_remote:
         name: flathub
         state: present
         flatpakrepo_url: https://flathub.org/repo/flathub.flatpakrepo
         method: user
-        
+
     - name: Install Bitwarden
       community.general.flatpak:
         name: com.bitwarden.desktop
         state: present
         remote: flathub
-    
+
     - name: Install Telegram Desktop
       community.general.flatpak:
         name: org.telegram.desktop
@@ -65,94 +66,105 @@
         name: com.github.marktext.marktext
         state: present
         remote: flathub
-        
+
     - name: Install Discord
       community.general.flatpak:
         name: com.discordapp.Discord
         state: present
         remote: flathub
-        
+
     - name: Install Gnome Boxes
       community.general.flatpak:
         name: org.gnome.Boxes
         state: present
         remote: flathub
-        
+
     - name: Install Cider
       community.general.flatpak:
         name: sh.cider.Cider
         state: present
         remote: flathub
-    
+
     - name: Install Anki
       community.general.flatpak:
         name: net.ankiweb.Anki
         state: present
         remote: flathub
-    
+
     - name: Install OnlyOffice
       community.general.flatpak:
         name: org.onlyoffice.desktopeditors
         state: present
         remote: flathub
-    
+
     - name: Change shell to zsh
       user:
         name: "{{ username }}"
         shell: /usr/bin/zsh
-    
+
     - name: Clone zsh-autosuggestions from github
       ansible.builtin.git:
         repo: https://github.com/zsh-users/zsh-autosuggestions
         dest: /home/{{ username }}/.zsh/plugins/zsh-autosuggestions
+        version: main
 
     - name: Clone zsh-completions from github
       ansible.builtin.git:
         repo: https://github.com/zsh-users/zsh-completions
         dest: /home/{{ username }}/.zsh/plugins/zsh-completions
+        version: main
 
     - name: Clone zsh-syntax-highlighting from github
       ansible.builtin.git:
         repo: https://github.com/zsh-users/zsh-syntax-highlighting
         dest: /home/{{ username }}/.zsh/plugins/zsh-syntax-highlighting
-    
+        version: main
+
     - name: Clone .config files from github and move them to the right locations
-      block: 
+      block:
         - name: Clone .config files repo
           ansible.builtin.git:
             repo: https://github.com/Clepnicx/config-files
             dest: /home/{{ username }}/config-files
-            
+            version: main
+
         - name: Move starship.toml
           ansible.builtin.copy:
             src: /home/{{ username }}/config-files/starship.toml
             dest: /home/{{ username }}/.config
-            
+            mode: preserve
+
         - name: Move kitty.conf
           ansible.builtin.copy:
             src: /home/{{ username }}/config-files/kitty.conf
             dest: /home/{{ username }}/.config/kitty/
-            
+            mode: preserve
+
         - name: Move .zshrc
           ansible.builtin.copy:
             src: /home/{{ username }}/config-files/.zshrc
             dest: /home/{{ username }}/
-        
+            mode: preserve
+
         - name: Move .bashrc
           ansible.builtin.copy:
             src: /home/{{ username }}/config-files/.bashrc
             dest: /home/{{ username }}/
-            
+            mode: preserve
+
         - name: Move .vimrc
           ansible.builtin.copy:
             src: /home/{{ username }}/config-files/.vimrc
             dest: /home/{{ username }}/
-    
+            mode: preserve
+
     - name: Install papyrus-icons
       ansible.builtin.raw: wget -qO- https://git.io/papirus-icon-theme-install | sh
-      
+      register: output
+      changed_when: output.rc != 0
+
     - name: Install papyrus-folders
       ansible.builtin.raw: wget -qO- https://git.io/papirus-folders-install | sh
-      
+
     - name: Set folder color
       ansible.builtin.raw: papirus-folders -C indigo
