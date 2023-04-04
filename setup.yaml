@@ -11,7 +11,7 @@
 
   tasks:
     - name: Remove unwanted packages
-      ansible.builtin.apt:
+      ansible.builtin.package:
         pkg:
           - kmail
           - korganizer
