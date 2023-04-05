@@ -74,7 +74,6 @@
         - name: Install opensuse packages
           community.general.zypper:
             pkg:
-              - bismuth
               - curl
               - flatpak
               - fira-code-fonts
@@ -90,7 +89,6 @@
               - openscad
               - python3
               - qbittorrent
-              - quickemu
               - retroarch
               - texlive-scheme-medium
               - MozillaThunderbird
