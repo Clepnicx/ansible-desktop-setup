@@ -1,10 +1,11 @@
 ---
-- hosts: localhost    # desktop setup
+- name: Linux Desktop Setup
+  hosts: localhost    # desktop setup
   connection: local
   become: true
 
   vars:
-    username: clepnicx    # change username to current name
+    username: clep   # change username to current name
     distro: opensuse    # change to distro, options: opensuse, debian, fedora, arch
     desktop: kde    # change to de, options: kde, gnome
 
@@ -12,152 +13,243 @@
     - community.general
 
   tasks:
-    - name: Remove unwanted packages
+    ### Desktopenviorment block ###
+    - name: Setup KDE
       when: desktop == "kde"
-      ansible.builtin.package:
-        pkg:
-          - kmail
-          - korganizer
-          - konqueror
-        state: absent
+      block:
+        - name: Remove unwanted packages kde
+          ansible.builtin.package:
+            pkg:
+              - kmail
+              - korganizer
+              - konqueror
+            state: absent
 
-    - name: Install debian packages
+        - name: Install KDE packages
+          ansible.builtin.package:
+            pkg:
+              - bismuth
+            state: present
+
+    - name: Setup Gnome
+      when: desktop == "gnome"
+      block:
+        - name: Remove unwanted packages gnome
+          ansible.builtin.package:
+            pkg:
+            state: absent
+
+    ### Debian block ###
+    - name: Setup Debian
       when: distro == "debian"
-      ansible.builtin.apt:
-        pkg:
-          - bpytop
-          - curl
-          - firefox-esr
-          - flatpak
-          - fonts-firacode
-          - fonts-font-awesome
-          - fonts-powerline
-          - ghc
-          - git
-          - gparted
-          - kitty
-          - micro
-          - neofetch
-          - nextcloud-desktop
-          - openconnect
-          - openscad
-          - python3
-          - qbittorrent
-          - retroarch
-          - syncthing-gtk
-          - texlive-full
-          - thunderbird
-          - vlc
-          - wget
-          - zsh
-        state: present
-        update_cache: true
+      block:
+        - name: Install debian packages
+          ansible.builtin.apt:
+            pkg:
+              - bpytop
+              - curl
+              - flatpak
+              - fonts-firacode
+              - fonts-font-awesome
+              - fonts-powerline
+              - ghc
+              - git
+              - gparted
+              - kitty
+              - micro
+              - neofetch
+              - nextcloud-desktop
+              - openconnect
+              - openscad
+              - python3
+              - qbittorrent
+              - retroarch
+              - texlive-full
+              - thunderbird
+              - vlc
+              - wget
+              - zsh
+            state: present
+            update_cache: true
 
-    - name: Install debian packages
+    ### OpenSuse block ###
+    - name: Setup OpenSuse
       when: distro == "opensuse"
-      community.general.zypper:
-        pkg:
-          - bpytop
-          - flatpak
-          - fonts-firacode
-          - fonts-font-awesome
-          - fonts-powerline
-          - ghc
-          - kitty
-          - micro
-          - neofetch
-          - nextcloud-desktop
-          - openconnect
-          - openscad
-          - python3
-          - syncthing-gtk
-          - texlive-full
-          - thunderbird
-          - vlc
-          - wget
-          - zsh
-        state: present
-        disable_recommends: false
-        update_cache: true
+      block:
+        - name: Install opensuse packages
+          community.general.zypper:
+            pkg:
+              - curl
+              - flatpak
+              - fira-code-fonts
+              - fontawesome-fonts
+              - powerline-fonts
+              - ghc
+              - git
+              - kitty
+              - micro-editor
+              - neofetch
+              - nextcloud-desktop
+              - openconnect
+              - openscad
+              - python3
+              - qbittorrent
+              - quickemu
+              - retroarch
+              - texlive-scheme-medium
+              - MozillaThunderbird
+              - vlc
+              - wget
+              - zsh
+            state: present
+            disable_recommends: false
+            update_cache: true
 
-    - name: Add flathub flatpak repository remote to the user installation
-      community.general.flatpak_remote:
-        name: flathub
-        state: present
-        flatpakrepo_url: https://flathub.org/repo/flathub.flatpakrepo
-        method: user
+        - name: Install bpytop with pip
+          ansible.builtin.pip:
+            name: bpytop
 
-    - name: Install Bitwarden
-      community.general.flatpak:
-        name: com.bitwarden.desktop
-        state: present
-        remote: flathub
+    ### Fedora block ###
+    - name: Setup Fedora
+      when: distro == "fedora"
+      block:
+        - name: Install rpm repositorys
+          block:
+            - name: Install rpm free
+              ansible.builtin.command: sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+              register: my_output
+              changed_when: my_output.rc != 0
 
-    - name: Install Telegram Desktop
-      community.general.flatpak:
-        name: org.telegram.desktop
-        state: present
-        remote: flathub
+            - name: Install rpm unfree
+              ansible.builtin.command: sudo dnf install https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+              register: my_output
+              changed_when: my_output.rc != 0
 
-    - name: Install MarkText
-      community.general.flatpak:
-        name: com.github.marktext.marktext
-        state: present
-        remote: flathub
+        - name: Enable belsar/quickemu corp repo
+          ansible.builtin.command: dnf copr enable belsar/quickemu
+          register: my_output
+          changed_when: my_output.rc != 0
 
-    - name: Install Discord
-      community.general.flatpak:
-        name: com.discordapp.Discord
-        state: present
-        remote: flathub
+        - name: Install fedora packages
+          ansible.builtin.dnf:
+            pkg:
+              - bpytop
+              - curl
+              - flatpak
+              - fira-code-fonts
+              - fontawesome-fonts
+              - powerline-fonts
+              - ghc
+              - git
+              - kitty
+              - micro
+              - neofetch
+              - nextcloud-client
+              - openconnect
+              - openscad
+              - python3
+              - qbittorrent
+              - quickemu
+              - retroarch
+              - texlive-scheme-medium
+              - thunderbird
+              - vlc
+              - wget
+              - zsh
+            state: present
+            update_cache: true
 
-    - name: Install Gnome Boxes
-      community.general.flatpak:
-        name: org.gnome.Boxes
-        state: present
-        remote: flathub
+    ### Flatpak block ###
+    - name: Install Flatpaks
+      block:
+        - name: Add flathub flatpak repository remote to the user installation
+          community.general.flatpak_remote:
+            name: flathub
+            state: present
+            flatpakrepo_url: https://flathub.org/repo/flathub.flatpakrepo
+            method: user
 
-    - name: Install Cider
-      community.general.flatpak:
-        name: sh.cider.Cider
-        state: present
-        remote: flathub
+        - name: Install Bitwarden
+          community.general.flatpak:
+            name: com.bitwarden.desktop
+            state: present
+            remote: flathub
 
-    - name: Install Anki
-      community.general.flatpak:
-        name: net.ankiweb.Anki
-        state: present
-        remote: flathub
+        - name: Install Telegram Desktop
+          community.general.flatpak:
+            name: org.telegram.desktop
+            state: present
+            remote: flathub
 
-    - name: Install OnlyOffice
-      community.general.flatpak:
-        name: org.onlyoffice.desktopeditors
-        state: present
-        remote: flathub
+        - name: Install MarkText
+          community.general.flatpak:
+            name: com.github.marktext.marktext
+            state: present
+            remote: flathub
 
-    - name: Change shell to zsh
-      user:
-        name: "{{ username }}"
-        shell: /usr/bin/zsh
+        - name: Install Discord
+          community.general.flatpak:
+            name: com.discordapp.Discord
+            state: present
+            remote: flathub
 
-    - name: Clone zsh-autosuggestions from github
-      ansible.builtin.git:
-        repo: https://github.com/zsh-users/zsh-autosuggestions
-        dest: /home/{{ username }}/.zsh/plugins/zsh-autosuggestions
-        version: main
+        - name: Install Gnome Boxes
+          community.general.flatpak:
+            name: org.gnome.Boxes
+            state: present
+            remote: flathub
 
-    - name: Clone zsh-completions from github
-      ansible.builtin.git:
-        repo: https://github.com/zsh-users/zsh-completions
-        dest: /home/{{ username }}/.zsh/plugins/zsh-completions
-        version: main
+        - name: Install Cider
+          community.general.flatpak:
+            name: sh.cider.Cider
+            state: present
+            remote: flathub
 
-    - name: Clone zsh-syntax-highlighting from github
-      ansible.builtin.git:
-        repo: https://github.com/zsh-users/zsh-syntax-highlighting
-        dest: /home/{{ username }}/.zsh/plugins/zsh-syntax-highlighting
-        version: main
+        - name: Install Anki
+          community.general.flatpak:
+            name: net.ankiweb.Anki
+            state: present
+            remote: flathub
 
+        - name: Install OnlyOffice
+          community.general.flatpak:
+            name: org.onlyoffice.desktopeditors
+            state: present
+            remote: flathub
+
+        - name: Install Syncthing GTK
+          community.general.flatpak:
+            name: me.kozec.syncthingtk
+            state: present
+            remote: flathub
+
+    ### Zsh block ###
+    - name: Setup zsh
+      block:
+        - name: Change shell to zsh
+          user:
+            name: "{{ username }}"
+            shell: /usr/bin/zsh
+
+        - name: Clone zsh-autosuggestions from github
+          ansible.builtin.git:
+            repo: https://github.com/zsh-users/zsh-autosuggestions
+            dest: /home/{{ username }}/.zsh/plugins/zsh-autosuggestions
+            version: main
+
+        - name: Clone zsh-completions from github
+          ansible.builtin.git:
+            repo: https://github.com/zsh-users/zsh-completions
+            dest: /home/{{ username }}/.zsh/plugins/zsh-completions
+            version: main
+
+        - name: Clone zsh-syntax-highlighting from github
+          ansible.builtin.git:
+            repo: https://github.com/zsh-users/zsh-syntax-highlighting
+            dest: /home/{{ username }}/.zsh/plugins/zsh-syntax-highlighting
+            version: main
+
+    ### Configfiles block ###
     - name: Clone .config files from github and move them to the right locations
       block:
         - name: Clone .config files repo
@@ -195,14 +287,17 @@
             src: /home/{{ username }}/config-files/.vimrc
             dest: /home/{{ username }}/
             mode: preserve
+    
+    ### Icons block ###
+    - name: Install Icons
+      block:
+        - name: Install papyrus-icons
+          ansible.builtin.raw: wget -qO- https://git.io/papirus-icon-theme-install | sh
+          register: output
+          changed_when: output.rc != 0
 
-    - name: Install papyrus-icons
-      ansible.builtin.raw: wget -qO- https://git.io/papirus-icon-theme-install | sh
-      register: output
-      changed_when: output.rc != 0
+        - name: Install papyrus-folders
+          ansible.builtin.raw: wget -qO- https://git.io/papirus-folders-install | sh
 
-    - name: Install papyrus-folders
-      ansible.builtin.raw: wget -qO- https://git.io/papirus-folders-install | sh
-
-    - name: Set folder color
-      ansible.builtin.raw: papirus-folders -C indigo
+        - name: Set folder color
+          ansible.builtin.raw: papirus-folders -C indigo
