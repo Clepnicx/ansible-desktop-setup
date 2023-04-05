@@ -25,12 +25,6 @@
               - konqueror
             state: absent
 
-        - name: Install KDE packages
-          ansible.builtin.package:
-            pkg:
-              - bismuth
-            state: present
-
     - name: Setup Gnome
       when: desktop == "gnome"
       block:
@@ -47,6 +41,7 @@
           ansible.builtin.apt:
             pkg:
               - bpytop
+              - bismuth
               - curl
               - flatpak
               - fonts-firacode
@@ -79,6 +74,7 @@
         - name: Install opensuse packages
           community.general.zypper:
             pkg:
+              - bismuth
               - curl
               - flatpak
               - fira-code-fonts
@@ -134,6 +130,7 @@
           ansible.builtin.dnf:
             pkg:
               - bpytop
+              - bismuth
               - curl
               - flatpak
               - fira-code-fonts
