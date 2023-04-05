@@ -90,6 +90,7 @@
               - python3
               - qbittorrent
               - retroarch
+              - starship
               - texlive-scheme-medium
               - MozillaThunderbird
               - vlc
@@ -230,19 +231,19 @@
           ansible.builtin.git:
             repo: https://github.com/zsh-users/zsh-autosuggestions
             dest: /home/{{ username }}/.zsh/plugins/zsh-autosuggestions
-            version: main
+            version: master
 
         - name: Clone zsh-completions from github
           ansible.builtin.git:
             repo: https://github.com/zsh-users/zsh-completions
             dest: /home/{{ username }}/.zsh/plugins/zsh-completions
-            version: main
+            version: master
 
         - name: Clone zsh-syntax-highlighting from github
           ansible.builtin.git:
             repo: https://github.com/zsh-users/zsh-syntax-highlighting
             dest: /home/{{ username }}/.zsh/plugins/zsh-syntax-highlighting
-            version: main
+            version: master
 
     ### Configfiles block ###
     - name: Clone .config files from github and move them to the right locations
@@ -282,7 +283,7 @@
             src: /home/{{ username }}/config-files/.vimrc
             dest: /home/{{ username }}/
             mode: preserve
-    
+
     ### Icons block ###
     - name: Install Icons
       block:
@@ -293,6 +294,10 @@
 
         - name: Install papyrus-folders
           ansible.builtin.raw: wget -qO- https://git.io/papirus-folders-install | sh
+          register: output
+          changed_when: output.rc != 0
 
         - name: Set folder color
           ansible.builtin.raw: papirus-folders -C indigo
+          register: output
+          changed_when: output.rc != 0
