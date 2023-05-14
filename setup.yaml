@@ -252,6 +252,12 @@
             name: com.github.tchx84.Flatseal
             state: present
             remote: flathub
+            
+        - name: Install Logseq
+          community.general.flatpak:
+            name: com.logseq.Logseq
+            state: present
+            remote: flathub
 
     ### Zsh block ###
     - name: Setup zsh
