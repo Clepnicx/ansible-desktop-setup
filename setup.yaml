@@ -6,7 +6,7 @@
 
   vars:
     username: clep   # change username to current name
-    distro: opensuse    # change to distro, options: opensuse, debian, fedora, arch
+    distro: opensuse    # change to distro, options: opensuse, debian, fedora
     desktop: kde    # change to de, options: kde, gnome
 
   collections:
