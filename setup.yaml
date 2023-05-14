@@ -5,7 +5,7 @@
   become: true
 
   vars:
-    username: clep   # change username to current name
+    username: clep   # change to current username
     distro: opensuse    # change to distro, options: opensuse, debian, fedora
     desktop: kde    # change to de, options: kde, gnome
 
