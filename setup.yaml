@@ -31,6 +31,7 @@
         - name: Remove unwanted packages gnome
           ansible.builtin.package:
             pkg:
+              - gnome-mahjongg
             state: absent
 
     ### Debian block ###
@@ -71,6 +72,26 @@
     - name: Setup OpenSuse
       when: distro == "opensuse"
       block:
+        - name: Add VSCode repository
+          block:
+            - name: Import rpm repo
+              ansible.builtin.command:
+                sudo rpm --import https://packages.microsoft.com/keys/microsoft.asc
+              register: my_output
+              changed_when: my_output.rc != 0
+
+            - name: Add repo
+              ansible.builtin.command:
+                sudo zypper addrepo https://packages.microsoft.com/yumrepos/vscode vscode
+              register: my_output
+              changed_when: my_output.rc != 0
+
+            - name: Refresh repo cash
+              ansible.builtin.command:
+                sudo zypper refresh
+              register: my_output
+              changed_when: my_output.rc != 0
+
         - name: Install opensuse packages
           community.general.zypper:
             pkg:
@@ -219,6 +240,19 @@
             state: present
             remote: flathub
 
+        - name: Install Gnome Extensions-Manager
+          when: desktop == "gnome"
+          community.general.flatpak:
+            name: com.mattjakeman.ExtensionManager
+            state: present
+            remote: flathub
+
+        - name: Install Flatseal
+          community.general.flatpak:
+            name: com.github.tchx84.Flatseal
+            state: present
+            remote: flathub
+
     ### Zsh block ###
     - name: Setup zsh
       block:
@@ -298,6 +332,6 @@
           changed_when: output.rc != 0
 
         - name: Set folder color
-          ansible.builtin.raw: papirus-folders -C indigo
+          ansible.builtin.command: papirus-folders -C indigo
           register: output
           changed_when: output.rc != 0
