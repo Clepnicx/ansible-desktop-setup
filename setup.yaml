@@ -228,7 +228,7 @@
             version: master
 
     ### Configfiles block ###
-    - name: Clone .config files from github and move them to the right locations
+    - name: Import config files
       block:
         - name: Clone .config files repo
           ansible.builtin.git:
@@ -260,11 +260,23 @@
             dest: /home/{{ username }}/
             mode: preserve
 
-        - name: Move .vimrc
-          ansible.builtin.copy:
-            src: /home/{{ username }}/config-files/.vimrc
-            dest: /home/{{ username }}/
-            mode: preserve
+        - name: Setup vim
+          block:
+          - name: Move .vimrc
+            ansible.builtin.copy:
+              src: /home/{{ username }}/config-files/.vimrc
+              dest: /home/{{ username }}/
+              mode: preserve
+          - name: Create /.vim/
+            ansible.builtin.command:
+              mkdir -p ~/.vim ~/.vim/autoload ~/.vim/backup ~/.vim/colors ~/.vim/plugged
+            register: my_output
+            changed_when: my_output.rc != 0
+          - name: Add vim-plug plugin manager
+            ansible.builtin.command:
+              curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+            register: my_output
+            changed_when: my_output.rc != 0
 
     ### Icons block ###
     - name: Install Icons
