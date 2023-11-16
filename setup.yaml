@@ -86,6 +86,14 @@
               register: my_output
               changed_when: my_output.rc != 0
 
+        - name: Add Tailscale repository
+          block:
+            - name: Import repository
+              ansible.builtin.command:
+                sudo zypper ar -g -r https://pkgs.tailscale.com/stable/opensuse/tumbleweed/tailscale.repo
+              register: my_output
+              changed_when: my_output.rc != 0
+
         - name: Install opensuse packages
           community.general.zypper:
             pkg:
@@ -104,6 +112,7 @@
               - retroarch
               #- starship
               - steam
+              - tailscale
               - texlive-scheme-medium
               - MozillaThunderbird
               - vim
@@ -262,36 +271,34 @@
 
         - name: Setup vim
           block:
-          - name: Move .vimrc
-            ansible.builtin.copy:
-              src: /home/{{ username }}/config-files/.vimrc
-              dest: /home/{{ username }}/
-              mode: preserve
-          - name: Create /.vim/
-            ansible.builtin.command:
-              mkdir -p ~/.vim ~/.vim/autoload ~/.vim/backup ~/.vim/colors ~/.vim/plugged
-            register: my_output
-            changed_when: my_output.rc != 0
-          - name: Add vim-plug plugin manager
-            ansible.builtin.command:
-              curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-            register: my_output
-            changed_when: my_output.rc != 0
+            - name: Move .vimrc
+              ansible.builtin.copy:
+                src: /home/{{ username }}/config-files/.vimrc
+                dest: /home/{{ username }}/
+                mode: preserve
+            - name: Create /.vim/
+              ansible.builtin.command:
+                mkdir -p ~/.vim ~/.vim/autoload ~/.vim/backup ~/.vim/colors ~/.vim/plugged
+              register: my_output
+              changed_when: my_output.rc != 0
+            - name: Add vim-plug plugin manager
+              ansible.builtin.command:
+                curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+              register: my_output
+              changed_when: my_output.rc != 0
 
-    ### Icons block ###
-    - name: Install Icons
+    ### Tailscale ###
+    - name: Setup Tailscale
       block:
-        - name: Install papyrus-icons
-          ansible.builtin.raw: wget -qO- https://git.io/papirus-icon-theme-install | sh
-          register: output
-          changed_when: output.rc != 0
+        - name: Start tailscale service
+          ansible.builtin.command:
+            sudo systemctl enable --now tailscaled
+          register: my_output
+          changed_when: my_output.rc != 0
 
-        - name: Install papyrus-folders
-          ansible.builtin.raw: wget -qO- https://git.io/papirus-folders-install | sh
-          register: output
-          changed_when: output.rc != 0
-
-        - name: Set folder color
-          ansible.builtin.command: papirus-folders -C indigo
-          register: output
-          changed_when: output.rc != 0
+        - name: Connect machine to Tailscale Network
+          ansible.builtin.command:
+            sudo tailscale up
+          register: my_output
+          changed_when: my_output.rc != 0
+      
