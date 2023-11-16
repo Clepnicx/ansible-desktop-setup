@@ -8,6 +8,7 @@
     username: clep   # change to current username
     distro: opensuse    # change to distro, options: opensuse, debian, fedora
     desktop: kde    # change to de, options: kde, gnome
+    shell: bash    # change to shell, options: zsh, bash
 
   collections:
     - community.general
@@ -20,9 +21,6 @@
         - name: Remove unwanted packages kde
           ansible.builtin.package:
             pkg:
-              - kmail
-              - korganizer
-              - konqueror
             state: absent
 
     - name: Setup Gnome
@@ -42,8 +40,6 @@
           ansible.builtin.apt:
             pkg:
               - bpytop
-              - bismuth
-              - curl
               - flatpak
               - fonts-firacode
               - fonts-font-awesome
@@ -52,19 +48,17 @@
               - git
               - gparted
               - kitty
-              - micro
+              #- micro
               - neofetch
               - nextcloud-desktop
-              - openconnect
               - openscad
               - python3
               - qbittorrent
-              - retroarch
               - texlive-full
               - thunderbird
+              - vim
               - vlc
-              - wget
-              - zsh
+              #- zsh
             state: present
             update_cache: true
 
@@ -95,7 +89,6 @@
         - name: Install opensuse packages
           community.general.zypper:
             pkg:
-              - curl
               - flatpak
               - fira-code-fonts
               - fontawesome-fonts
@@ -103,20 +96,19 @@
               - ghc
               - git
               - kitty
-              - micro-editor
+              #- micro-editor
               - neofetch
               - nextcloud-desktop
-              - openconnect
               - openscad
-              - python3
               - qbittorrent
               - retroarch
-              - starship
+              #- starship
+              - steam
               - texlive-scheme-medium
               - MozillaThunderbird
+              - vim
               - vlc
-              - wget
-              - zsh
+              #- zsh
             state: present
             disable_recommends: false
             update_cache: true
@@ -150,7 +142,6 @@
           ansible.builtin.dnf:
             pkg:
               - bpytop
-              - bismuth
               - curl
               - flatpak
               - fira-code-fonts
@@ -159,25 +150,21 @@
               - ghc
               - git
               - kitty
-              - micro
+              #- micro
               - neofetch
               - nextcloud-client
-              - openconnect
               - openscad
-              - python3
               - qbittorrent
-              - quickemu
-              - retroarch
               - texlive-scheme-medium
               - thunderbird
+              - vim
               - vlc
-              - wget
-              - zsh
+              #- zsh
             state: present
             update_cache: true
 
     ### Flatpak block ###
-    - name: Install Flatpaks
+    - name: Setup Flatpaks
       block:
         - name: Add flathub flatpak repository remote to the user installation
           community.general.flatpak_remote:
@@ -186,57 +173,23 @@
             flatpakrepo_url: https://flathub.org/repo/flathub.flatpakrepo
             method: user
 
-        - name: Install Bitwarden
+        - name: Install Flatpaks
           community.general.flatpak:
-            name: com.bitwarden.desktop
-            state: present
-            remote: flathub
-
-        - name: Install Telegram Desktop
-          community.general.flatpak:
-            name: org.telegram.desktop
-            state: present
-            remote: flathub
-
-        - name: Install MarkText
-          community.general.flatpak:
-            name: com.github.marktext.marktext
-            state: present
-            remote: flathub
-
-        - name: Install Discord
-          community.general.flatpak:
-            name: com.discordapp.Discord
-            state: present
-            remote: flathub
-
-        - name: Install Gnome Boxes
-          community.general.flatpak:
-            name: org.gnome.Boxes
-            state: present
-            remote: flathub
-
-        - name: Install Cider
-          community.general.flatpak:
-            name: sh.cider.Cider
-            state: present
-            remote: flathub
-
-        - name: Install Anki
-          community.general.flatpak:
-            name: net.ankiweb.Anki
-            state: present
-            remote: flathub
-
-        - name: Install OnlyOffice
-          community.general.flatpak:
-            name: org.onlyoffice.desktopeditors
-            state: present
-            remote: flathub
-
-        - name: Install Syncthing GTK
-          community.general.flatpak:
-            name: me.kozec.syncthingtk
+            name: 
+              - com.bitwarden.desktop
+              - com.makemkv.MakeMKV
+              - com.discordapp.Discord
+              - sh.cider.Cider
+              - org.onlyoffice.desktopeditors
+              - com.github.tchx84.Flatseal
+              - com.logseq.Logseq
+              - com.borgbase.Vorta
+              - com.github.jeromerobert.pdfarranger
+              - com.heroicgameslauncher.hgl
+              - com.makemkv.MakeMKV
+              - com.protonvpn.www
+              - fr.handbrake.ghb
+              - org.freac.freac
             state: present
             remote: flathub
 
@@ -245,22 +198,11 @@
           community.general.flatpak:
             name: com.mattjakeman.ExtensionManager
             state: present
-            remote: flathub
-
-        - name: Install Flatseal
-          community.general.flatpak:
-            name: com.github.tchx84.Flatseal
-            state: present
-            remote: flathub
-            
-        - name: Install Logseq
-          community.general.flatpak:
-            name: com.logseq.Logseq
-            state: present
-            remote: flathub
+            remote: flathub          
 
     ### Zsh block ###
     - name: Setup zsh
+      when: shell == "zsh" 
       block:
         - name: Change shell to zsh
           user:
